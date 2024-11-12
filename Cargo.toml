@@ -2,6 +2,7 @@
 name = "rust_paper_scissors"
 version = "0.1.0"
 edition = "2021"
-
+description = "my terminal rock paper scissors game"
+license = "Apache-2.0 "
 [dependencies]
 rand = { version = "0.8.5", features = ["small_rng"] }
