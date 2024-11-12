@@ -1,7 +1,7 @@
 use rand::Rng;
 use std::fmt;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 enum Choice {
     Rust,
     Paper,
@@ -16,27 +16,27 @@ impl fmt::Display for Choice {
         }
     }
 }
-impl Choice {
-    fn new() -> Self {
-        let mut rng = rand::thread_rng();
-        match rng.gen::<i32>() {
+impl Choice { /* Issue here! won't regen at all, always scissors 😭 */
+    fn new() -> Self { // Problem: this uses  a random number seeded by the system. It won't change for awhile, AND if the number is out of range it will always land on scissors. You need a random function with a range from 0 to 2
+        match rand::thread_rng().gen_range(0..2) {
             0 => Choice::Rust,
             1 => Choice::Paper,
             _ => Choice::Scissors,
         }
     }
 
-    fn winner(self, other: Choice) -> Option<String> {
-        match (self, other) {
-            (Choice::Rust, Choice::Scissors) | (Choice::Scissors, Choice::Paper) | (Choice::Paper, Choice::Rust) => Some("You Win!".to_string()),
-            _ => None
+    fn winner(self, other: Choice) -> String {
+        match other {
+            Choice::Rust => "You won with Rust!".to_string(),
+            Choice::Paper => "You won with Paper!!".to_string(),
+            Choice::Scissors => "You won with Scissors!".to_string(),
         }
     }
     fn loss(self) -> String {
         match self {
-            Choice::Rust => "Paper beats Rust".to_string(),
-            Choice::Paper => "Scissors beats Paper".to_string(),
-            Choice::Scissors => "Rust beats Scissors".to_string(),
+            Choice::Rust => "Bot beats Rust. You lost!".to_string(),
+            Choice::Paper => "Bot beats Paper. You lost!".to_string(),
+            Choice::Scissors => "Bot beats Scissors. You lost!".to_string(),
         }
     }
 
@@ -56,26 +56,19 @@ fn main() {
             _ => panic!("Invalid input!"),
         };
         let bot_choice = Choice::new();
-
-        println!("You choose: {:?}", user_choice);
+        println!("You chose: {:?}", user_choice);
         println!("Bot chose: {:?}", bot_choice);
 
-        match (user_choice, bot_choice) {
-            (Choice::Rust, Choice::Scissors) | (Choice::Scissors, Choice::Rust) | (Choice::Paper, Choice::Scissors) => {
-                println!("{:?}", user_choice.loss());
+        match (user_choice.clone(), bot_choice.clone()) {
+            (Choice::Scissors, Choice::Rust) | (Choice::Rust, Choice::Paper) | (Choice::Paper, Choice::Scissors) => {
+                println!("{:?}", user_choice.clone().loss());
             }
             (Choice::Rust, Choice::Scissors) | (Choice::Scissors, Choice::Paper) | (Choice::Paper, Choice::Rust) => {
-                println!("{:?}", bot_choice.winner(user_choice));
+                println!("{:?}", bot_choice.clone().winner(user_choice));
             }
             (Choice::Rust, Choice::Rust) | (Choice::Scissors, Choice::Scissors) | (Choice::Paper, Choice::Paper) => {
-                println!("{:?}", user_choice.tie());
+                println!("{:?}", user_choice.clone().tie());
             }
-        }
-
-        if let Some(winner) = bot_choice.winner(user_choice) {
-            println!("You lost! The winner is: {}", winner);
-        } else if user_choice == bot_choice {
-            println!("It's a tie!");
         }
         
         println!("Do you want to play again? (yes/no)");
